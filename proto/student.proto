@@ -4,8 +4,25 @@ package student;
 
 option go_package = "github.com/DarioRoman01/grpc;studentpb"; 
 
+// Student is the student message type.
 message Student {
   string id = 1;
   string name = 2;
   int32 age = 3;
+}
+
+// StudentList is the student list message type.
+message GetStudentRequest {
+  string id = 1;
+}
+
+// StudentList is the student list message type.
+message SetStudentResponse {
+  string id = 1;
+}
+
+// StudentList is the student list message type.
+service StudentService {
+  rpc GetStudent(GetStudentRequest) returns (Student);
+  rpc SetStudent(Student) returns (SetStudentResponse);
 }
