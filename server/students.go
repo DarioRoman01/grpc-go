@@ -8,18 +8,18 @@ import (
 	"github.com/DarioRoman01/grpc/studentpb"
 )
 
-type Server struct {
+type StudentsServer struct {
 	repo repository.Respository
 	studentpb.UnimplementedStudentServiceServer
 }
 
 // function that creates a new Server instance with a given repository
-func NewServer(repo repository.Respository) *Server {
-	return &Server{repo: repo}
+func NewStudentsServer(repo repository.Respository) *StudentsServer {
+	return &StudentsServer{repo: repo}
 }
 
 // function that gives the implementation of the GetStudent method
-func (s *Server) GetStudent(ctx context.Context, req *studentpb.GetStudentRequest) (*studentpb.Student, error) {
+func (s *StudentsServer) GetStudent(ctx context.Context, req *studentpb.GetStudentRequest) (*studentpb.Student, error) {
 	student, err := s.repo.GetStudent(ctx, req.GetId())
 	if err != nil {
 		return nil, err
@@ -33,7 +33,7 @@ func (s *Server) GetStudent(ctx context.Context, req *studentpb.GetStudentReques
 }
 
 // function that gives the implementation of the SetStudent method
-func (s *Server) SetStudent(ctx context.Context, req *studentpb.Student) (*studentpb.SetStudentResponse, error) {
+func (s *StudentsServer) SetStudent(ctx context.Context, req *studentpb.Student) (*studentpb.SetStudentResponse, error) {
 	err := s.repo.SetStudent(ctx, &models.Student{
 		ID:   req.GetId(),
 		Name: req.GetName(),
