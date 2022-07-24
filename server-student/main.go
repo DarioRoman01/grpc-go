@@ -7,10 +7,12 @@ import (
 	"github.com/DarioRoman01/grpc/database"
 	"github.com/DarioRoman01/grpc/server"
 	"github.com/DarioRoman01/grpc/studentpb"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/reflection"
 )
 
 func main() {
-	list, err := net.Listen("tcp", ":8080")
+	listener, err := net.Listen("tcp", ":8080")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -21,5 +23,13 @@ func main() {
 	}
 
 	server := server.NewServer(repo)
-	studentpb.RegisterStudentServiceServer(server, server)
+	s := grpc.NewServer()
+	studentpb.RegisterStudentServiceServer(s, server)
+
+	reflection.Register(s)
+	if err := s.Serve(listener); err != nil {
+		log.Fatal(err)
+	}
+
+	log.Println("Server started on port 8080")
 }
