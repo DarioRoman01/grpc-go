@@ -22,6 +22,14 @@ type Respository interface {
 	SetEnrollment(ctx context.Context, enrollment *models.Enrollment) error
 	// GetStudentEnrollments returns all students enrollments in the given test
 	GetStudentsPerTest(ctx context.Context, testID string) ([]*models.Student, error)
+	// GetQuestionsPerTest returns all questions in the given test
+	GetQuestionsPerTest(ctx context.Context, testID string) ([]*models.Question, error)
+	// SetAnswer saves an answer in the repository
+	SetAnswer(ctx context.Context, answer *models.Answer) error
+	// GetStudentAnswers returns all answers of the given student in the given test
+	GetStudentAnswers(ctx context.Context, studentID, testID string) ([]*models.Answer, error)
+	// GetStudentScore returns the score of the given student in the given test
+	GetStudentScore(ctx context.Context, studentID, testID string) (*models.StudentScore, error)
 }
 
 // implementation of the repository
@@ -58,4 +66,8 @@ func SetEnrollment(ctx context.Context, enrollment *models.Enrollment) error {
 
 func GetStudentsPerTest(ctx context.Context, testID string) ([]*models.Student, error) {
 	return implementation.GetStudentsPerTest(ctx, testID)
+}
+
+func GetQuestionsPerTest(ctx context.Context, testID string) ([]*models.Question, error) {
+	return implementation.GetQuestionsPerTest(ctx, testID)
 }

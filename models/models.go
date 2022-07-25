@@ -37,3 +37,30 @@ type Enrollment struct {
 	// test id of the enrollment
 	TestID string `json:"test_id"`
 }
+
+// representation of a student response to a question
+type Answer struct {
+	// student id of the enrollment
+	StudentID string `json:"student_id"`
+	// test id of the enrollment
+	TestID string `json:"test_id"`
+	// question id of the answer
+	QuestionID string `json:"question_id"`
+	// answer of the question
+	Answer string `json:"answer"`
+	// correct answer of the question
+	CorrectAnswer string `json:"correct_answer"`
+	// the answer is correct or not
+	Correct bool `json:"correct"`
+}
+
+type StudentScore struct {
+	// student id of the enrollment
+	StudentID string `json:"student_id"`
+	// test id of the enrollment
+	TestID string `json:"test_id"`
+	// score of the student
+	Score int32 `json:"score"`
+	// total number of questions in the test
+	Total int32 `json:"total"`
+}

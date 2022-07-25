@@ -88,3 +88,71 @@ func (r *PostgresRepository) GetStudentsPerTest(ctx context.Context, testID stri
 
 	return students, nil
 }
+
+// function that gives the implementation of the GetQuestionsPerTest method
+func (r *PostgresRepository) GetQuestionsPerTest(ctx context.Context, testID string) ([]*models.Question, error) {
+	rows, err := r.db.QueryContext(ctx, "SELECT id, question, answer, test_id FROM questions WHERE test_id = $1", testID)
+	if err != nil {
+		return nil, err
+	}
+
+	defer rows.Close()
+	var questions []*models.Question
+	for rows.Next() {
+		var question models.Question
+		err := rows.Scan(&question.ID, &question.Question, &question.Answer, &question.TestID)
+		if err != nil {
+			return nil, err
+		}
+		questions = append(questions, &question)
+	}
+
+	return questions, nil
+}
+
+func (r *PostgresRepository) SetAnswer(ctx context.Context, answer *models.Answer) error {
+	_, err := r.db.ExecContext(ctx,
+		"INSERT INTO answers (student_id, question_id, test_id, answer, correct_answer, correct) VALUES ($1, $2, $3, $4, $5, $6)",
+		answer.StudentID, answer.QuestionID, answer.TestID, answer.Answer, answer.CorrectAnswer, answer.Correct,
+	)
+	return err
+}
+
+func (r *PostgresRepository) GetStudentAnswers(ctx context.Context, studentID, testID string) ([]*models.Answer, error) {
+	rows, err := r.db.QueryContext(ctx, "SELECT * FROM answers WHERE student_id = $1 and test_id = $2", studentID, testID)
+	if err != nil {
+		return nil, err
+	}
+
+	defer rows.Close()
+	var answers []*models.Answer
+	for rows.Next() {
+		var answer models.Answer
+		err := rows.Scan(
+			&answer.StudentID,
+			&answer.QuestionID,
+			&answer.TestID,
+			&answer.Answer,
+			&answer.CorrectAnswer,
+			&answer.Correct,
+		)
+		if err != nil {
+			return nil, err
+		}
+		answers = append(answers, &answer)
+	}
+
+	return answers, nil
+}
+
+func (r *PostgresRepository) GetStudentScore(ctx context.Context, studentID, testID string) (*models.StudentScore, error) {
+	var score models.StudentScore
+	err := r.db.QueryRowContext(ctx,
+		"SELECT student_id, test_id, COUNT(correct), COUNT(correct_answer) FROM answers WHERE student_id = $1 and test_id = $2 GROUP BY student_id, test_id",
+		studentID, testID).Scan(&score.StudentID, &score.TestID, &score.Score, &score.Total)
+	if err != nil {
+		return nil, err
+	}
+
+	return &score, nil
+}

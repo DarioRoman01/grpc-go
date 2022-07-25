@@ -123,3 +123,116 @@ func (s *TestServer) GetStudentPerTest(req *testpb.GetStudentPerTestRequest, str
 
 	return nil
 }
+
+func (s *TestServer) TakeTest(stream testpb.TestService_TakeTestServer) error {
+	for {
+		msg, err := stream.Recv()
+		testId := msg.GetTestId()
+		if err == io.EOF {
+			return nil
+		}
+
+		questions, err := s.repo.GetQuestionsPerTest(context.Background(), testId)
+		if err != nil {
+			return err
+		}
+
+		i := 0
+		var currentQuestion *models.Question
+		for {
+			if i >= len(questions) {
+				return nil
+			}
+
+			currentQuestion = questions[i]
+
+			err := stream.Send(&testpb.Question{
+				Id:       currentQuestion.ID,
+				Question: currentQuestion.Question,
+			})
+
+			if err != nil {
+				return err
+			}
+
+			i++
+
+			answer, err := stream.Recv()
+			if err == io.EOF {
+				return nil
+			}
+
+			if err != nil {
+				return err
+			}
+
+			err = s.repo.SetAnswer(context.Background(), &models.Answer{
+				StudentID:     msg.GetStudentId(),
+				TestID:        testId,
+				QuestionID:    currentQuestion.ID,
+				Answer:        answer.GetAnswer(),
+				CorrectAnswer: currentQuestion.Answer,
+				Correct:       answer.GetAnswer() == currentQuestion.Answer,
+			})
+
+			if err != nil {
+				return err
+			}
+		}
+
+	}
+}
+
+func (s *TestServer) GetStudentAnswer(stream testpb.TestService_GetStudentAnswerServer) error {
+	for {
+		msg, err := stream.Recv()
+		if err == io.EOF {
+			return nil
+		}
+
+		answers, err := s.repo.GetStudentAnswers(context.Background(), msg.GetStudentId(), msg.GetTestId())
+		if err != nil {
+			return err
+		}
+
+		for _, a := range answers {
+			err := stream.Send(&testpb.AnswerResponse{
+				StudentId:     a.StudentID,
+				TestId:        a.TestID,
+				QuestionId:    a.QuestionID,
+				Answer:        a.Answer,
+				CorrectAnswer: a.CorrectAnswer,
+				Correct:       a.Correct,
+			})
+
+			if err != nil {
+				return err
+			}
+		}
+	}
+}
+
+func (s *TestServer) GetStudentScore(stream testpb.TestService_GetStudentScoreServer) error {
+	for {
+		msg, err := stream.Recv()
+		if err == io.EOF {
+			return nil
+		}
+
+		score, err := s.repo.GetStudentScore(context.Background(), msg.GetStudentId(), msg.GetTestId())
+		if err != nil {
+			return err
+		}
+
+		err = stream.Send(&testpb.ScoreResponse{
+			StudentId: msg.GetStudentId(),
+			TestId:    msg.GetTestId(),
+			Score:     score.Score,
+			Total:     score.Total,
+		})
+
+		if err != nil {
+			return err
+		}
+	}
+}

@@ -28,6 +28,9 @@ type TestServiceClient interface {
 	SetQuestion(ctx context.Context, opts ...grpc.CallOption) (TestService_SetQuestionClient, error)
 	EnrollStudent(ctx context.Context, opts ...grpc.CallOption) (TestService_EnrollStudentClient, error)
 	GetStudentPerTest(ctx context.Context, in *GetStudentPerTestRequest, opts ...grpc.CallOption) (TestService_GetStudentPerTestClient, error)
+	TakeTest(ctx context.Context, opts ...grpc.CallOption) (TestService_TakeTestClient, error)
+	GetStudentAnswer(ctx context.Context, opts ...grpc.CallOption) (TestService_GetStudentAnswerClient, error)
+	GetStudentScore(ctx context.Context, opts ...grpc.CallOption) (TestService_GetStudentScoreClient, error)
 }
 
 type testServiceClient struct {
@@ -156,6 +159,99 @@ func (x *testServiceGetStudentPerTestClient) Recv() (*studentpb.Student, error) 
 	return m, nil
 }
 
+func (c *testServiceClient) TakeTest(ctx context.Context, opts ...grpc.CallOption) (TestService_TakeTestClient, error) {
+	stream, err := c.cc.NewStream(ctx, &TestService_ServiceDesc.Streams[3], "/test.TestService/TakeTest", opts...)
+	if err != nil {
+		return nil, err
+	}
+	x := &testServiceTakeTestClient{stream}
+	return x, nil
+}
+
+type TestService_TakeTestClient interface {
+	Send(*TakeTestRequest) error
+	Recv() (*Question, error)
+	grpc.ClientStream
+}
+
+type testServiceTakeTestClient struct {
+	grpc.ClientStream
+}
+
+func (x *testServiceTakeTestClient) Send(m *TakeTestRequest) error {
+	return x.ClientStream.SendMsg(m)
+}
+
+func (x *testServiceTakeTestClient) Recv() (*Question, error) {
+	m := new(Question)
+	if err := x.ClientStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
+}
+
+func (c *testServiceClient) GetStudentAnswer(ctx context.Context, opts ...grpc.CallOption) (TestService_GetStudentAnswerClient, error) {
+	stream, err := c.cc.NewStream(ctx, &TestService_ServiceDesc.Streams[4], "/test.TestService/GetStudentAnswer", opts...)
+	if err != nil {
+		return nil, err
+	}
+	x := &testServiceGetStudentAnswerClient{stream}
+	return x, nil
+}
+
+type TestService_GetStudentAnswerClient interface {
+	Send(*GetStudentScoreRequest) error
+	Recv() (*AnswerResponse, error)
+	grpc.ClientStream
+}
+
+type testServiceGetStudentAnswerClient struct {
+	grpc.ClientStream
+}
+
+func (x *testServiceGetStudentAnswerClient) Send(m *GetStudentScoreRequest) error {
+	return x.ClientStream.SendMsg(m)
+}
+
+func (x *testServiceGetStudentAnswerClient) Recv() (*AnswerResponse, error) {
+	m := new(AnswerResponse)
+	if err := x.ClientStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
+}
+
+func (c *testServiceClient) GetStudentScore(ctx context.Context, opts ...grpc.CallOption) (TestService_GetStudentScoreClient, error) {
+	stream, err := c.cc.NewStream(ctx, &TestService_ServiceDesc.Streams[5], "/test.TestService/GetStudentScore", opts...)
+	if err != nil {
+		return nil, err
+	}
+	x := &testServiceGetStudentScoreClient{stream}
+	return x, nil
+}
+
+type TestService_GetStudentScoreClient interface {
+	Send(*GetStudentScoreRequest) error
+	Recv() (*ScoreResponse, error)
+	grpc.ClientStream
+}
+
+type testServiceGetStudentScoreClient struct {
+	grpc.ClientStream
+}
+
+func (x *testServiceGetStudentScoreClient) Send(m *GetStudentScoreRequest) error {
+	return x.ClientStream.SendMsg(m)
+}
+
+func (x *testServiceGetStudentScoreClient) Recv() (*ScoreResponse, error) {
+	m := new(ScoreResponse)
+	if err := x.ClientStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
+}
+
 // TestServiceServer is the server API for TestService service.
 // All implementations must embed UnimplementedTestServiceServer
 // for forward compatibility
@@ -165,6 +261,9 @@ type TestServiceServer interface {
 	SetQuestion(TestService_SetQuestionServer) error
 	EnrollStudent(TestService_EnrollStudentServer) error
 	GetStudentPerTest(*GetStudentPerTestRequest, TestService_GetStudentPerTestServer) error
+	TakeTest(TestService_TakeTestServer) error
+	GetStudentAnswer(TestService_GetStudentAnswerServer) error
+	GetStudentScore(TestService_GetStudentScoreServer) error
 	mustEmbedUnimplementedTestServiceServer()
 }
 
@@ -186,6 +285,15 @@ func (UnimplementedTestServiceServer) EnrollStudent(TestService_EnrollStudentSer
 }
 func (UnimplementedTestServiceServer) GetStudentPerTest(*GetStudentPerTestRequest, TestService_GetStudentPerTestServer) error {
 	return status.Errorf(codes.Unimplemented, "method GetStudentPerTest not implemented")
+}
+func (UnimplementedTestServiceServer) TakeTest(TestService_TakeTestServer) error {
+	return status.Errorf(codes.Unimplemented, "method TakeTest not implemented")
+}
+func (UnimplementedTestServiceServer) GetStudentAnswer(TestService_GetStudentAnswerServer) error {
+	return status.Errorf(codes.Unimplemented, "method GetStudentAnswer not implemented")
+}
+func (UnimplementedTestServiceServer) GetStudentScore(TestService_GetStudentScoreServer) error {
+	return status.Errorf(codes.Unimplemented, "method GetStudentScore not implemented")
 }
 func (UnimplementedTestServiceServer) mustEmbedUnimplementedTestServiceServer() {}
 
@@ -309,6 +417,84 @@ func (x *testServiceGetStudentPerTestServer) Send(m *studentpb.Student) error {
 	return x.ServerStream.SendMsg(m)
 }
 
+func _TestService_TakeTest_Handler(srv interface{}, stream grpc.ServerStream) error {
+	return srv.(TestServiceServer).TakeTest(&testServiceTakeTestServer{stream})
+}
+
+type TestService_TakeTestServer interface {
+	Send(*Question) error
+	Recv() (*TakeTestRequest, error)
+	grpc.ServerStream
+}
+
+type testServiceTakeTestServer struct {
+	grpc.ServerStream
+}
+
+func (x *testServiceTakeTestServer) Send(m *Question) error {
+	return x.ServerStream.SendMsg(m)
+}
+
+func (x *testServiceTakeTestServer) Recv() (*TakeTestRequest, error) {
+	m := new(TakeTestRequest)
+	if err := x.ServerStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
+}
+
+func _TestService_GetStudentAnswer_Handler(srv interface{}, stream grpc.ServerStream) error {
+	return srv.(TestServiceServer).GetStudentAnswer(&testServiceGetStudentAnswerServer{stream})
+}
+
+type TestService_GetStudentAnswerServer interface {
+	Send(*AnswerResponse) error
+	Recv() (*GetStudentScoreRequest, error)
+	grpc.ServerStream
+}
+
+type testServiceGetStudentAnswerServer struct {
+	grpc.ServerStream
+}
+
+func (x *testServiceGetStudentAnswerServer) Send(m *AnswerResponse) error {
+	return x.ServerStream.SendMsg(m)
+}
+
+func (x *testServiceGetStudentAnswerServer) Recv() (*GetStudentScoreRequest, error) {
+	m := new(GetStudentScoreRequest)
+	if err := x.ServerStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
+}
+
+func _TestService_GetStudentScore_Handler(srv interface{}, stream grpc.ServerStream) error {
+	return srv.(TestServiceServer).GetStudentScore(&testServiceGetStudentScoreServer{stream})
+}
+
+type TestService_GetStudentScoreServer interface {
+	Send(*ScoreResponse) error
+	Recv() (*GetStudentScoreRequest, error)
+	grpc.ServerStream
+}
+
+type testServiceGetStudentScoreServer struct {
+	grpc.ServerStream
+}
+
+func (x *testServiceGetStudentScoreServer) Send(m *ScoreResponse) error {
+	return x.ServerStream.SendMsg(m)
+}
+
+func (x *testServiceGetStudentScoreServer) Recv() (*GetStudentScoreRequest, error) {
+	m := new(GetStudentScoreRequest)
+	if err := x.ServerStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
+}
+
 // TestService_ServiceDesc is the grpc.ServiceDesc for TestService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -340,6 +526,24 @@ var TestService_ServiceDesc = grpc.ServiceDesc{
 			StreamName:    "GetStudentPerTest",
 			Handler:       _TestService_GetStudentPerTest_Handler,
 			ServerStreams: true,
+		},
+		{
+			StreamName:    "TakeTest",
+			Handler:       _TestService_TakeTest_Handler,
+			ServerStreams: true,
+			ClientStreams: true,
+		},
+		{
+			StreamName:    "GetStudentAnswer",
+			Handler:       _TestService_GetStudentAnswer_Handler,
+			ServerStreams: true,
+			ClientStreams: true,
+		},
+		{
+			StreamName:    "GetStudentScore",
+			Handler:       _TestService_GetStudentScore_Handler,
+			ServerStreams: true,
+			ClientStreams: true,
 		},
 	},
 	Metadata: "testpb/test.proto",
