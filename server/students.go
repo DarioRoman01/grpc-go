@@ -8,8 +8,11 @@ import (
 	"github.com/DarioRoman01/grpc/studentpb"
 )
 
+// StudentServer is the implementation of the studentpb.StudentServiceServer interface
 type StudentsServer struct {
+	// repository that stores the students
 	repo repository.Respository
+	// unimplemented method
 	studentpb.UnimplementedStudentServiceServer
 }
 
