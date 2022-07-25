@@ -2,7 +2,7 @@ syntax = "proto3";
 
 package student;
 
-option go_package = "github.com/DarioRoman01/grpc;studentpb"; 
+option go_package = "github.com/DarioRoman01/grpc/studentpb"; 
 
 // Student is the student message type.
 message Student {

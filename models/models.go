@@ -29,3 +29,11 @@ type Question struct {
 	// test id where the question belongs to
 	TestID string `json:"test_id"`
 }
+
+// represents a enrollment of a student in a test
+type Enrollment struct {
+	// student id of the enrollment
+	StudentID string `json:"student_id"`
+	// test id of the enrollment
+	TestID string `json:"test_id"`
+}

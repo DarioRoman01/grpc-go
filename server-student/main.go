@@ -17,6 +17,7 @@ func main() {
 		log.Fatal(err)
 	}
 
+	defer listener.Close()
 	repo, err := database.NewPostgresRepository("postgres://postgres:postgres@localhost:54321/postgres?sslmode=disable")
 	if err != nil {
 		log.Fatal(err)

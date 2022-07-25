@@ -61,3 +61,30 @@ func (r *PostgresRepository) SetQuestion(ctx context.Context, question *models.Q
 	_, err := r.db.ExecContext(ctx, "INSERT INTO questions (id, question, answer, test_id) VALUES ($1, $2, $3, $4)", question.ID, question.Question, question.Answer, question.TestID)
 	return err
 }
+
+// function that gives the implementation of the SetEnrollment method
+func (r *PostgresRepository) SetEnrollment(ctx context.Context, enrollment *models.Enrollment) error {
+	_, err := r.db.ExecContext(ctx, "INSERT INTO enrollments (student_id, test_id) VALUES ($1, $2)", enrollment.StudentID, enrollment.TestID)
+	return err
+}
+
+// function that gives the implementation of the GetStudentsPerTest method
+func (r *PostgresRepository) GetStudentsPerTest(ctx context.Context, testID string) ([]*models.Student, error) {
+	rows, err := r.db.QueryContext(ctx, "SELECT id, name, age FROM students WHERE id IN (SELECT student_id FROM enrollments WHERE test_id = $1)", testID)
+	if err != nil {
+		return nil, err
+	}
+
+	defer rows.Close()
+	var students []*models.Student
+	for rows.Next() {
+		var student models.Student
+		err := rows.Scan(&student.ID, &student.Name, &student.Age)
+		if err != nil {
+			return nil, err
+		}
+		students = append(students, &student)
+	}
+
+	return students, nil
+}

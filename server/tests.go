@@ -6,6 +6,7 @@ import (
 
 	"github.com/DarioRoman01/grpc/models"
 	"github.com/DarioRoman01/grpc/repository"
+	"github.com/DarioRoman01/grpc/studentpb"
 	"github.com/DarioRoman01/grpc/testpb"
 )
 
@@ -74,4 +75,51 @@ func (s *TestServer) SetQuestion(stream testpb.TestService_SetQuestionServer) er
 			})
 		}
 	}
+}
+
+func (s *TestServer) EnrollStudent(stream testpb.TestService_EnrollStudentServer) error {
+	for {
+		enrollment, err := stream.Recv()
+		if err == io.EOF {
+			return stream.SendAndClose(&testpb.SetQuestionResponse{
+				Ok: true,
+			})
+		}
+
+		if err != nil {
+			return err
+		}
+
+		err = s.repo.SetEnrollment(stream.Context(), &models.Enrollment{
+			StudentID: enrollment.GetStudentId(),
+			TestID:    enrollment.GetTestId(),
+		})
+
+		if err != nil {
+			return stream.SendAndClose(&testpb.SetQuestionResponse{
+				Ok: false,
+			})
+		}
+	}
+}
+
+func (s *TestServer) GetStudentPerTest(req *testpb.GetStudentPerTestRequest, stream testpb.TestService_GetStudentPerTestServer) error {
+	enrollment, err := s.repo.GetStudentsPerTest(context.Background(), req.GetTestId())
+	if err != nil {
+		return err
+	}
+
+	for _, e := range enrollment {
+		err := stream.Send(&studentpb.Student{
+			Id:   e.ID,
+			Name: e.Name,
+			Age:  e.Age,
+		})
+
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
 }
