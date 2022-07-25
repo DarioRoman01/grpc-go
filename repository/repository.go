@@ -6,15 +6,24 @@ import (
 	"github.com/DarioRoman01/grpc/models"
 )
 
+// Respository interface
 type Respository interface {
+	// GetStudent returns a student with the given id
 	GetStudent(ctx context.Context, id string) (*models.Student, error)
+	// SetStudent saves a student in the repository
 	SetStudent(ctx context.Context, student *models.Student) error
+	// GetTest returns a test with the given id
 	GetTest(ctx context.Context, id string) (*models.Test, error)
+	// SetTest saves a test in the repository
 	SetTest(ctx context.Context, test *models.Test) error
+	// SetQuestion saves a question in the repository
+	SetQuestion(ctx context.Context, question *models.Question) error
 }
 
+// implementation of the repository
 var implementation Respository
 
+// SetImplementation sets the implementation of the repository
 func SetRepository(repository Respository) {
 	implementation = repository
 }
@@ -33,4 +42,8 @@ func GetTest(ctx context.Context, id string) (*models.Test, error) {
 
 func SetTest(ctx context.Context, test *models.Test) error {
 	return implementation.SetTest(ctx, test)
+}
+
+func SetQuestion(ctx context.Context, question *models.Question) error {
+	return implementation.SetQuestion(ctx, question)
 }
